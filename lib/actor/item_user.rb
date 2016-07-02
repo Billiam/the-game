@@ -136,6 +136,7 @@ class ItemUser < ApiActor
     return ! protected? if type == :protect
     return available_effects(type).any? if type == :boost
     return available_target if type == :attack_player
+    
     true
   end
   
