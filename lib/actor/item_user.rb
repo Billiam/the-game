@@ -81,6 +81,7 @@ class ItemUser < ApiActor
     [
       available_items(:common_boost).any?,
       available_items(:boost).length > 1,
+      ! has_effect?(ItemClasses.boost),
       points == 1
     ].all?
   end

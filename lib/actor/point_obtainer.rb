@@ -24,7 +24,7 @@ class PointObtainer < ApiActor
   end
   
   def gaining_points?
-    @points > 0
+    @points >= 0
   end
   
   def frequency
