@@ -21,16 +21,16 @@ class ItemUser < ApiActor
     subscribe Events::SET_TARGET, :set_target
   end
   
-  def set_target(topic, username)
-    @available_target = username if username
+  def set_target(topic, username, effects=[])
+    @available_target = { name: username, effects: effects } if username
   end
-
+  
   def run
     listen
 
     super
   end
-
+  
   def set_effects(topic, effects)
     @effects = effects
   end
@@ -56,11 +56,31 @@ class ItemUser < ApiActor
   def has_effect?(type)
     (self.effects & Array(type)).any?
   end
+
+  def have_item?(name)
+    @store.fetch(name, []).any?
+  end
+
+  def available_attacks
+    return [] unless @available_target
+    
+    enemy_effects = @available_target[:effects]
+
+    available_items(:attack_player) - enemy_effects
+  end
+  
+  def attack_item
+    names = available_attacks
+    return unless names.any?
+    item_name = names.first
+    
+    { id: @store[item_name].first, name: item_name }
+  end
   
   def use_item(id, name, attack=false)
     self.class.make_request do
       begin
-        result = self.client.use_item(id, attack ? available_target : nil)
+        result = self.client.use_item(id, attack ? available_target[:name] : nil)
         
         remove_item(id, name)
         publish Events::USE_ITEM, id, name
@@ -94,50 +114,70 @@ class ItemUser < ApiActor
     end
   end
 
-  def find_by_type(type)
-    item_name = ItemClasses.by_type(type).find do |name|
-      @store.fetch(name, []).any?
+  def available_items(type)
+    ItemClasses.by_type(type).select do |name|
+      have_item?(name)
     end
+  end
+
+  def available_effects(type)
+    available_items(type).reject { |name| has_effect?(name) }
+  end
+  
+  def find_attack
+    item_names = available_attacks
+    
+    return false unless item_names.any?
+    
+    first_item_by_name(item_names.first)
+  end
+  
+  def find_by_type(type)
+    item_name = available_items(type)
     
     return false unless item_name
     
-    { id: @store[item_name].first, name: item_name }
+    first_item_by_name(item_name)
   end
   
   def find_by_unbuffed(type)
     item_names = available_effects(type)
     return false unless item_names.any?
     
-    item_name = item_names.first
-
+    first_item_by_name(item_names.first)
+  end
+  
+  def first_item_by_name(item_name)
+    return unless @store[item_name] && @store[item_name].any?
     { id: @store[item_name].first, name: item_name }
   end
-
+  
   def use_type(type)
-    if [:protect, :buff].include?(type)
-      item = find_by_unbuffed(type)
-    else
-      item = find_by_type(type)
+    item = case type
+      when :protect, :boost
+        find_by_unbuffed(type)
+      when :attack_player
+        find_attack
+      else
+        find_by_type(type)
     end
-    
+
     return false unless item
 
     use_item(item[:id], item[:name], type == :attack_player)
   end
-
-  
-  def available_effects(type)
-    ItemClasses.by_type(type).select do |name|
-      @store.fetch(name, []).any? && ! has_effect?(type)
-    end
-  end
   
   def should_use?(type)
-    return ! protected? if type == :protect
-    return available_effects(type).any? if type == :boost
-    return available_target if type == :attack_player
-    
-    true
+    case type
+      when :protect
+        ! protected?
+      when :boost
+        available_effects(type).any?
+      when :attack_player
+        available_attacks
+      else
+        true
+    end
   end
   
   def tick

@@ -32,6 +32,6 @@ class TargetTracker < ApiActor
   end
   
   def notify(user)
-    publish Events::SET_TARGET, user["PlayerName"]
+    publish Events::SET_TARGET, user["PlayerName"], user["Effects"]
   end
 end
