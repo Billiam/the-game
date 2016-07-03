@@ -34,7 +34,7 @@ class TargetTracker < ApiActor
     user = users.first
     notify user if user
     
-    notify_leaderboard users
+    notify_leaderboard leaderboard
   end
   
   def notify_leaderboard(leaderboard)
