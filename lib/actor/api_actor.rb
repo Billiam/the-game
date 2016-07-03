@@ -1,4 +1,5 @@
-require_relative "../throttle"
+require "celluloid/current"
+require_relative "../game_api"
 
 class ApiActor
   include Celluloid

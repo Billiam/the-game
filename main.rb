@@ -9,10 +9,6 @@ require "dotenv"
 require "logger"
 require "celluloid/current"
 
-require "game_api"
-require "throttle"
-require "item_classes"
-
 require "actor/item_user"
 require "actor/item_store"
 require "actor/point_obtainer"
@@ -27,9 +23,11 @@ class Game
     @item_store = ItemStore.new
     inventory = @item_store.inventory
     
-    @items = ItemUser.new(api_key, inventory)
+    player_name = ENV.fetch("PLAYER_NAME")
+    
+    @items = ItemUser.new(api_key, player_name, inventory)
     @points = PointObtainer.new(api_key)
-    @targeter = TargetTracker.new(api_key, ENV.fetch("PLAYER_NAME"))
+    @targeter = TargetTracker.new(api_key, [player_name])
   end
   
   def run

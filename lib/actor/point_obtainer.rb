@@ -1,3 +1,5 @@
+require "celluloid/current"
+
 require_relative "./api_actor"
 require_relative "../events"
 require_relative "../reporter"

@@ -1,3 +1,5 @@
+require "celluloid/current"
+
 require_relative "./api_actor"
 require_relative "../item_classes"
 require_relative "../events"
@@ -8,13 +10,16 @@ class ItemUser < ApiActor
 
   attr_reader :store, :effects, :available_target, :points
   
-  def initialize(api_key, inventory = {})
+  def initialize(api_key, player_name, inventory = {})
     super(api_key, 60.5)
 
     @store =   Marshal.load(Marshal.dump(inventory))
     
+    @player_name = player_name.downcase
+    @current_position = Float::INFINITY
+    
     @effects = []
-    @points = 1
+    @points = nil
     @used_item = false
   end
 
@@ -23,8 +28,17 @@ class ItemUser < ApiActor
     subscribe Events::EFFECTS, :set_effects
     subscribe Events::SET_TARGET, :set_target
     subscribe Events::POINTS, :set_points
+    subscribe Events::SET_LEADERBOARD, :set_leaderboard
   end
 
+  def set_leaderboard(topic, leaderboard)
+    position = leaderboard.find_index do |player|
+      player["PlayerName"].strip.downcase == @player_name
+    end
+    
+    position ? position + 1 :  Float::INFINITY
+  end
+  
   def set_points(topic, points)
     @points = points
   end
@@ -77,6 +91,10 @@ class ItemUser < ApiActor
   
   def unprotected?
     ! has_effect?(ItemClasses.protect)
+  end
+  
+  def vulnerable?
+    @current_position.between?(1, 5)
   end
   
   def has_effect?(type)
@@ -197,13 +215,13 @@ class ItemUser < ApiActor
   def should_use?(type)
     case type
       when :protect
-        unprotected?
+        unprotected? && vulnerable?
       when :common_boost
         common_boost_ready?
       when :boost
         boost_ready?
       when :attack_player
-        available_attacks
+        available_attacks.any?
       else #:attack, :points have no preconditions
         true
     end
@@ -214,6 +232,8 @@ class ItemUser < ApiActor
   end
   
   def tick
+    return super unless points
+    
     result = priorities.find do |type|
       should_use?(type) && use_type(type)
     end

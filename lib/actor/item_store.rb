@@ -1,5 +1,7 @@
 require "yaml/store"
 
+require "celluloid/current"
+
 require_relative "../events"
 
 class ItemStore

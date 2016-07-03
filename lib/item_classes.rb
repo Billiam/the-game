@@ -4,7 +4,7 @@ module ItemClasses
   BOOST = ['7777', 'Warthog', 'Rush the Dog', 'Miniature Giant Space Hamster', 'Pony', 'Moogle']
   POINTS = ['Treasure Chest', 'Buffalo', 'Biggs', 'Pizza', 'UUDDLRLRBA', 'Pokeball', 'Chocobo', 'Da Da Da Da Daaa Da DAA da da', 'Wedge', 'Skinny Guys', 'Bo Jackson']
   ATTACK = ['Crowbar', 'Red Shell']
-  ATTACK_PLAYER = ['Master Sword', 'Buster Sword', 'Charizard', 'Rail Gun', 'SPNKR', 'Hard Knuckle', 'Box of Bees', "Pandora's Box", 'Space Invaders', 'Hadouken', 'Banana Peel', 'Green Shell', 'Fire Flower', 'Holy Water', 'Golden Gun', 'Fus Ro Dah', 'Box of Bees']
+  ATTACK_PLAYER = ['Master Sword', 'Buster Sword', 'Charizard', 'Rail Gun', 'SPNKR', 'Hard Knuckle', 'Box of Bees', "Pandora's Box", 'Hadouken', 'Banana Peel', 'Green Shell', 'Fire Flower', 'Holy Water', 'Golden Gun', 'Fus Ro Dah', 'Box of Bees']
   
   #Roger Wilco # - You used <Roger Wilco> on cfein; 0 points for cfein!
   

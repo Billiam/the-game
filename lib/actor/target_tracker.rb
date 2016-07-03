@@ -1,3 +1,5 @@
+require "celluloid/current"
+
 require_relative "./api_actor"
 require_relative "../item_classes"
 require_relative "../events"
@@ -31,6 +33,12 @@ class TargetTracker < ApiActor
     
     user = users.first
     notify user if user
+    
+    notify_leaderboard users
+  end
+  
+  def notify_leaderboard(leaderboard)
+    publish Events::SET_LEADERBOARD, leaderboard
   end
   
   def notify(user)
