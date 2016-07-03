@@ -232,8 +232,12 @@ class ItemUser < ApiActor
     @used_item ? @frequency : 10
   end
   
+  def abort?
+    ! points || effects.include?("TKO")
+  end
+  
   def tick
-    return super unless points
+    return super if abort?
     
     result = priorities.find do |type|
       should_use?(type) && use_type(type)
