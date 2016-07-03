@@ -5,10 +5,10 @@ require_relative "../events"
 class TargetTracker < ApiActor
   include Celluloid::Notifications
   
-  def initialize(api_key, username, inventory = {})
+  def initialize(api_key, ignore_users, inventory = {})
     super(api_key, 30)
 
-    @username = username
+    @ignore_users = Array(ignore_users).map { |name| name.strip.downcase }
     @target = nil
   end
   
@@ -17,13 +17,15 @@ class TargetTracker < ApiActor
       leaderboard = self.client.leaderboard
       select_target(leaderboard)
     end
+    
+    super
   end
   
   def select_target(leaderboard)
     return unless leaderboard
     
     users = leaderboard.select do |user| 
-      return false if user["PlayerName"].strip.downcase == @username.strip.downcase
+      next false if @ignore_users.include?(user["PlayerName"].strip.downcase)
       (user["Effects"] & ItemClasses.protect).none?
     end
     

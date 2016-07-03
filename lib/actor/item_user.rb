@@ -6,7 +6,7 @@ require_relative "../reporter"
 class ItemUser < ApiActor
   include Celluloid::Notifications
 
-  attr_reader :store, :effects, :available_target
+  attr_reader :store, :effects, :available_target, :points
   
   def initialize(api_key, inventory = {})
     super(api_key, 60.5)
@@ -14,22 +14,27 @@ class ItemUser < ApiActor
     @store =   Marshal.load(Marshal.dump(inventory))
     
     @effects = []
+    @points = 1
+    @used_item = false
   end
 
   def listen
     subscribe Events::ADD_ITEM, :add_item
     subscribe Events::EFFECTS, :set_effects
     subscribe Events::SET_TARGET, :set_target
+    subscribe Events::POINTS, :set_points
+  end
+
+  def set_points(topic, points)
+    @points = points
   end
   
   def set_target(topic, username, effects=[])
     @available_target = { name: username, effects: effects } if username
   end
   
-  def run
+  def before_run
     listen
-
-    super
   end
   
   def set_effects(topic, effects)
@@ -47,17 +52,37 @@ class ItemUser < ApiActor
   end
 
   def priorities
-    [:protect, :boost, :attack_player, :attack]
+    [:protect, :common_boost, :boost, :points, :attack_player, :attack]
   end
 
-  def protected?
-    has_effect?(ItemClasses.protect)
+  def losing_points?
+    points < 0
+  end
+  
+  def common_boosting?
+    has_effect?(ItemClasses.common_boost) && points > 1
+  end
+  
+  def common_boost_ready?
+    [
+      available_items(:common_boost).any?,
+      available_items(:boost).length > 1,
+      points == 1
+    ].all?
+  end
+  
+  def boost_ready?
+    available_effects(:boost).any? && common_boosting?
+  end
+  
+  def unprotected?
+    ! has_effect?(ItemClasses.protect)
   end
   
   def has_effect?(type)
     (self.effects & Array(type)).any?
   end
-
+  
   def have_item?(name)
     @store.fetch(name, []).any?
   end
@@ -156,7 +181,7 @@ class ItemUser < ApiActor
   
   def use_type(type)
     item = case type
-      when :protect, :boost
+      when :protect, :common_boost, :boost
         find_by_unbuffed(type)
       when :attack_player
         find_attack
@@ -172,19 +197,29 @@ class ItemUser < ApiActor
   def should_use?(type)
     case type
       when :protect
-        ! protected?
+        unprotected?
+      when :common_boost
+        common_boost_ready?
       when :boost
-        available_effects(type).any?
+        boost_ready?
       when :attack_player
         available_attacks
-      else
+      else #:attack, :points have no preconditions
         true
     end
   end
   
+  def frequency
+    @used_item ? @frequency : 10
+  end
+  
   def tick
-    priorities.find do |type|
+    result = priorities.find do |type|
       should_use?(type) && use_type(type)
     end
+    
+    @used_item = result
+    
+    super
   end
 end

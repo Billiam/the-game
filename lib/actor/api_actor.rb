@@ -9,15 +9,17 @@ class ApiActor
     @client = GameApi.new(api_key)
     @frequency = frequency
   end
-
-  def throttle
-    @_throttle ||= Throttle.new(@frequency)
+  
+  def frequency
+    @frequency
   end
-
+  
+  def before_run
+  end
+  
   def run
-    loop do
-      throttle.after { tick }
-    end
+    before_run
+    tick
   end
 
   def self.make_request
@@ -34,5 +36,6 @@ class ApiActor
   end
 
   def tick
+    after(frequency, &method(:tick))
   end
 end

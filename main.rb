@@ -1,10 +1,13 @@
 $:.unshift File.dirname(__FILE__)
 $:.unshift File.dirname(__FILE__) + "/lib"
 
-Bundler.require
-Dotenv.load
+require "rubygems"
+require "bundler"
+Bundler.setup(:default)
 
+require "dotenv"
 require "logger"
+require "celluloid/current"
 
 require "game_api"
 require "throttle"
@@ -15,7 +18,7 @@ require "actor/item_store"
 require "actor/point_obtainer"
 require "actor/target_tracker"
 
-require "celluloid/current"
+Dotenv.load
 
 class Game
   attr_reader :client
