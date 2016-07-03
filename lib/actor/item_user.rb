@@ -11,7 +11,8 @@ class ItemUser < ApiActor
   def initialize(api_key, inventory = {})
     super(api_key, 60.5)
 
-    @store = inventory
+    @store =   Marshal.load(Marshal.dump(inventory))
+    
     @effects = []
   end
 
@@ -137,7 +138,7 @@ class ItemUser < ApiActor
     
     return false unless item_name
     
-    first_item_by_name(item_name)
+    first_item_by_name(item_name.first)
   end
   
   def find_by_unbuffed(type)
@@ -149,6 +150,7 @@ class ItemUser < ApiActor
   
   def first_item_by_name(item_name)
     return unless @store[item_name] && @store[item_name].any?
+    
     { id: @store[item_name].first, name: item_name }
   end
   
@@ -181,8 +183,8 @@ class ItemUser < ApiActor
   end
   
   def tick
-    priorities.find { |type| 
+    priorities.find do |type|
       should_use?(type) && use_type(type)
-    }
+    end
   end
 end
