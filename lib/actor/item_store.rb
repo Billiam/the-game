@@ -43,12 +43,13 @@ class ItemStore
     end
   end
   
-  def before_run
+  def listen
     subscribe Events::ADD_ITEM, :add_item
     subscribe Events::USE_ITEM, :remove_item
   end
   
   def run
+    listen
     loop { sleep(5) }
   end
 end
