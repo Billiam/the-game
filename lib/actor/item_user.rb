@@ -36,7 +36,7 @@ class ItemUser < ApiActor
       player["PlayerName"].strip.downcase == @player_name
     end
     
-    position ? position + 1 :  Float::INFINITY
+    @current_position = position ? position + 1 :  Float::INFINITY
   end
   
   def set_points(topic, points)
@@ -94,7 +94,7 @@ class ItemUser < ApiActor
   end
   
   def vulnerable?
-    @current_position.between?(1, 5)
+    @current_position.between?(1, 3)
   end
   
   def has_effect?(type)
