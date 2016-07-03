@@ -15,8 +15,22 @@ class PointObtainer < ApiActor
 
       notify_items result
       notify_status result
+      
+      report result
+    end
+  end
+    
+  def report(result)
+    status = filtered_status(result)
+    
+    Reporter.say status
+  end
 
-      Reporter.say result
+  def filtered_status(result)
+    ["Badges"].reduce(result.dup) do |accumulator, key|
+      accumulator.delete(key)
+      
+      accumulator
     end
   end
 
