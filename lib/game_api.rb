@@ -37,12 +37,3 @@ class GameApi
     }
   end
 end
-
-class FilteredJson
-  include HTTParty
-
-  class JSON::Gross < HTTParty::Parser
-    def parse
-    end
-  end
-end
