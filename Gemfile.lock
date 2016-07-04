@@ -20,6 +20,7 @@ GEM
     celluloid-supervision (0.20.6)
       timers (>= 4.1.1)
     dotenv (2.1.1)
+    hitimes (1.2.4)
     hitimes (1.2.4-x86-mingw32)
     httparty (0.13.7)
       json (~> 1.8)
@@ -30,6 +31,7 @@ GEM
       hitimes
 
 PLATFORMS
+  ruby
   x86-mingw32
 
 DEPENDENCIES
@@ -39,4 +41,4 @@ DEPENDENCIES
   httparty
 
 BUNDLED WITH
-   1.12.4
+   1.12.5
