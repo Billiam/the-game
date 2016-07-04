@@ -11,9 +11,10 @@ class ItemUser < ApiActor
   attr_reader :store, :effects, :available_target, :points
   
   def initialize(api_key, player_name, inventory = {})
-    super(api_key, 60.5)
+    super(api_key, 61)
 
-    @store =   Marshal.load(Marshal.dump(inventory))
+    # Cheap deep clone
+    @store = Marshal.load(Marshal.dump(inventory))
     
     @player_name = player_name.downcase
     @current_position = Float::INFINITY
@@ -31,6 +32,19 @@ class ItemUser < ApiActor
     subscribe Events::SET_LEADERBOARD, :set_leaderboard
   end
 
+
+  def tick
+    return super if abort?
+
+    result = priorities.find do |type|
+      should_use?(type) && use_type(type)
+    end
+
+    @used_item = result
+
+    super
+  end
+
   def set_leaderboard(topic, leaderboard)
     position = leaderboard.find_index do |player|
       player["PlayerName"].strip.downcase == @player_name
@@ -38,7 +52,7 @@ class ItemUser < ApiActor
     
     @current_position = position ? position + 1 :  Float::INFINITY
   end
-  
+
   def set_points(topic, points)
     @points = points
   end
@@ -55,6 +69,7 @@ class ItemUser < ApiActor
     @effects = effects
   end
 
+  # local item storage. Move to new instance?
   def add_item(topic, id, name, description=nil, rarity=nil)
     @store[name] ||= []
     @store[name] << id
@@ -65,18 +80,23 @@ class ItemUser < ApiActor
     @store[name].reject! { |existing| existing == id }
   end
 
+  
+  
   def priorities
     [:protect, :common_boost, :boost, :points, :attack_player, :attack]
   end
 
+  
   def losing_points?
     points < 0
   end
   
+  # Test current effect and point state
   def common_boosting?
     has_effect?(ItemClasses.common_boost) && points > 1
   end
   
+  # Test current inventory state + effect state, point state
   def common_boost_ready?
     [
       available_items(:common_boost).any?,
@@ -86,6 +106,7 @@ class ItemUser < ApiActor
     ].all?
   end
   
+  # current inventory + effect state
   def boost_ready?
     available_effects(:boost).any? && common_boosting?
   end
@@ -234,17 +255,5 @@ class ItemUser < ApiActor
   
   def abort?
     ! points || effects.include?("TKO")
-  end
-  
-  def tick
-    return super if abort?
-    
-    result = priorities.find do |type|
-      should_use?(type) && use_type(type)
-    end
-    
-    @used_item = result
-    
-    super
   end
 end

@@ -8,7 +8,7 @@ class PointObtainer < ApiActor
   include Celluloid::Notifications
 
   def initialize(api_key)
-    super(api_key, 1.01)
+    super(api_key, 1.05)
   end
 
   def before_run
