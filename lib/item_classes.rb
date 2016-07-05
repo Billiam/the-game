@@ -4,9 +4,10 @@ module ItemClasses
   BOOST = ['Moogle', 'Rush the Dog', '7777', 'Warthog', 'Miniature Giant Space Hamster', 'Pony']
   POINTS = ['Treasure Chest', 'Buffalo', 'Biggs', 'Pizza', 'UUDDLRLRBA', 'Pokeball', 'Chocobo', 'Da Da Da Da Daaa Da DAA da da', 'Wedge', 'Skinny Guys', 'Bo Jackson']
   ATTACK = ['Crowbar', 'Red Shell']
-  ATTACK_PLAYER = ['Master Sword', 'Buster Sword', 'Charizard', 'Rail Gun', 'SPNKR', 'Red Crystal', 'Hard Knuckle', "Pandora's Box", 'Hadouken', 'Banana Peel', 'Green Shell', 'Fire Flower', 'Holy Water', 'Golden Gun', 'Fus Ro Dah', 'Box of Bees']
+  ATTACK_PLAYER = ['Golden Gun', 'Fus Ro Dah', "Pandora's Box", 'Fire Flower','Box of Bees']
   ATTACK_FIRST = ['Blue Shell']
-  ATTACK_SELF = ['Master Sword', 'Buster Sword', 'Charizard', 'Rail Gun', 'SPNKR',  'Hadouken', 'Red Crystal', 'Hard Knuckle', 'Banana Peel', 'Green Shell', 'Fire Flower', 'Holy Water']
+  ATTACK_SELF_HIGH = ['Master Sword']
+  ATTACK_SELF = ['Master Sword', 'Buster Sword', 'Charizard', 'Rail Gun', 'SPNKR',  'Hadouken', 'Red Crystal', 'Hard Knuckle', 'Holy Water', 'Banana Peel', 'Green Shell']
   ITEM_WASTER = ['TKO', 'Fus Ro Dah']
   POINT_BOUNCER = ['Carbuncle']
   

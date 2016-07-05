@@ -81,7 +81,17 @@ class ItemUser < ApiActor
   end
 
   def priorities
-    [:protection_boost, :go_big, :self_attack, :protect, :common_boost, :boost, :points, :attack]
+    [
+      :protection_boost,
+      :go_big,
+      :self_attack,
+      :protect,
+      :common_boost,
+      :boost,
+      :points,
+      :attack_player,
+      :attack
+    ]
   end
   
   def losing_points?
@@ -109,7 +119,8 @@ class ItemUser < ApiActor
   end
   
   def self_attack_ready?
-    self_attacks.length > 3 && available_item_total(:attack_self) > 10
+    high_self_attacks.any? ||
+      (self_attacks.length > 3 && available_item_total(:attack_self) > 10)
   end
   
   def well_prepared?
@@ -124,8 +135,12 @@ class ItemUser < ApiActor
     @current_position.between?(1, 3)
   end
   
+  def in_first?
+    @current_position == 1
+  end
+  
   def go_big_ready?
-    @current_position == 1 && well_prepared?
+    in_first? && well_prepared?
   end
   
   def wasting_items?
@@ -144,6 +159,10 @@ class ItemUser < ApiActor
     @store.fetch(name, []).length
   end
 
+  def high_self_attacks
+    available_items(:attack_self_high) - effects
+  end
+  
   def self_attacks
     available_items(:attack_self) - effects
   end
@@ -278,7 +297,7 @@ class ItemUser < ApiActor
       when :go_big
         go_big_ready?
       when :protection_boost
-        self_attack_ready?
+        in_first? || self_attack_ready?
       when :self_attack
         well_prepared?
       when :protect
