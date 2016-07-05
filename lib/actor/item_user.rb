@@ -80,12 +80,9 @@ class ItemUser < ApiActor
     @store[name].reject! { |existing| existing == id }
   end
 
-  
-  
   def priorities
-    [:protect, :common_boost, :boost, :points, :attack_player, :attack]
+    [:protection_boost, :go_big, :self_attack, :protect, :common_boost, :boost, :points, :attack_player, :attack]
   end
-
   
   def losing_points?
     points < 0
@@ -111,12 +108,28 @@ class ItemUser < ApiActor
     available_effects(:boost).any? && common_boosting?
   end
   
+  def self_attack_ready?
+    self_attacks.length > 3 && available_item_total(:attack_self) > 10
+  end
+  
+  def well_prepared?
+    has_effect? ItemClasses.point_bouncer
+  end
+  
   def unprotected?
     ! has_effect?(ItemClasses.protect)
   end
   
   def vulnerable?
     @current_position.between?(1, 3)
+  end
+  
+  def go_big_ready?
+    @current_position == 1 && well_prepared?
+  end
+  
+  def wasting_items?
+    has_effect? ItemClasses.item_waster
   end
   
   def has_effect?(type)
@@ -126,7 +139,15 @@ class ItemUser < ApiActor
   def have_item?(name)
     @store.fetch(name, []).any?
   end
+  
+  def item_count(name)
+    @store.fetch(name, []).length
+  end
 
+  def self_attacks
+    available_items(:attack_self) - effects
+  end
+  
   def available_attacks
     return [] unless @available_target
     
@@ -165,7 +186,7 @@ class ItemUser < ApiActor
   
   # "You found a bonus item! <6b7de0b4-cd86-402e-9fd3-d3026cf8adf4> | <Mushroom>"
   def add_bonus_item(message)
-    match = /You found a bonus item! <(?<id>.*)> \| <(?<name>.*)>/.match(message)
+    match = /(bonus item|hidden treasure)! <(?<id>.*)> \| <(?<name>.*)>/.match(message)
     return nil unless match
     
     add_item(nil, match[:id], match[:name])
@@ -185,9 +206,23 @@ class ItemUser < ApiActor
       have_item?(name)
     end
   end
+  
+  def available_item_total(type)
+    ItemClasses.by_type(type).sum do
+      item_count(type)
+    end
+  end
 
   def available_effects(type)
     available_items(type).reject { |name| has_effect?(name) }
+  end
+  
+  def find_self_attack
+    item_names = self_attacks
+
+    return false unless item_names.any?
+
+    first_item_by_name(item_names.first)
   end
   
   def find_attack
@@ -221,7 +256,11 @@ class ItemUser < ApiActor
   
   def use_type(type)
     item = case type
-      when :protect, :common_boost, :boost
+      when :go_big
+        find_by_type(:attack_first)
+      when :self_attack
+        find_self_attack
+      when :protection_boost, :protect, :common_boost, :boost
         find_by_unbuffed(type)
       when :attack_player
         find_attack
@@ -236,15 +275,21 @@ class ItemUser < ApiActor
   
   def should_use?(type)
     case type
+      when :go_big
+        go_big_ready?
+      when :protection_boost
+        self_attack_ready?
+      when :self_attack
+        well_prepared?
       when :protect
         unprotected? && vulnerable?
       when :common_boost
         common_boost_ready?
       when :boost
         boost_ready?
-      when :attack_player
-        available_attacks.any?
-      else #:attack, :points have no preconditions
+      # when :attack_player
+      #   available_attacks.any?
+      else #:attack and :points have no preconditions
         true
     end
   end
@@ -254,6 +299,6 @@ class ItemUser < ApiActor
   end
   
   def abort?
-    ! points || effects.include?("TKO")
+    ! points || wasting_items?
   end
 end
