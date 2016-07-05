@@ -81,7 +81,7 @@ class ItemUser < ApiActor
   end
 
   def priorities
-    [:protection_boost, :go_big, :self_attack, :protect, :common_boost, :boost, :points, :attack_player, :attack]
+    [:protection_boost, :go_big, :self_attack, :protect, :common_boost, :boost, :points, :attack]
   end
   
   def losing_points?
@@ -287,8 +287,8 @@ class ItemUser < ApiActor
         common_boost_ready?
       when :boost
         boost_ready?
-      # when :attack_player
-      #   available_attacks.any?
+      when :attack_player
+        available_attacks.any?
       else #:attack and :points have no preconditions
         true
     end
