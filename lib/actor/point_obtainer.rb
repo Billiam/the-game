@@ -72,7 +72,7 @@ class PointObtainer < ApiActor
       /gained (?<points>[-\d.]+) points!/.match(message)
     end.compact.first
     
-    publish Events::POINTS, last_points[:points].to_f
+    publish Events::POINTS, last_points[:points].to_f if last_points
   end
   
   def notify_items(result)
