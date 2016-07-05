@@ -33,7 +33,7 @@ class GameApi
         "apikey" => @key,
         "Accept" => "application/json"
       },
-      timeout: 10
+      timeout: 60
     }
   end
 end
