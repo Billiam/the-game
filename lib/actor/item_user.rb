@@ -279,7 +279,9 @@ class ItemUser < ApiActor
         find_by_type(:attack_first)
       when :self_attack
         find_self_attack
-      when :protection_boost, :protect, :common_boost, :boost
+      when :protection_boost
+        find_by_unbuffed(:point_bouncer)
+      when :protect, :common_boost, :boost
         find_by_unbuffed(type)
       when :attack_player
         find_attack
