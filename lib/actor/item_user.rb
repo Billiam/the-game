@@ -310,7 +310,9 @@ class ItemUser < ApiActor
         boost_ready?
       when :attack_player
         available_attacks.any?
-      else #:attack and :points have no preconditions
+      when :attack
+        ! in_first? || well_prepared?
+      else # :points have no preconditions
         true
     end
   end
