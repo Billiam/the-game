@@ -10,26 +10,6 @@ class PointObtainer < ApiActor
   def initialize(api_key)
     super(api_key, 1.05)
   end
-
-  def before_run
-    listen
-  end
-  
-  def listen
-    subscribe Events::POINTS, :set_points
-  end
-  
-  def set_points(topic, points)
-    @points = points
-  end
-  
-  def gaining_points?
-    @points >= 0
-  end
-  
-  def frequency
-    gaining_points? ? @frequency : @frequency * 30
-  end
   
   def tick
     self.class.make_request do
