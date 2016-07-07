@@ -82,9 +82,9 @@ class ItemUser < ApiActor
 
   def priorities
     [
-      :protection_boost,
-      :go_big,
       :self_attack,
+      :go_big,
+      :protection_boost,
       :protect,
       :common_boost,
       :boost,
@@ -118,9 +118,8 @@ class ItemUser < ApiActor
     available_effects(:boost).any? && common_boosting?
   end
   
-  def self_attack_ready?
-    high_self_attacks.any? ||
-      (self_attacks.length > 3 && available_item_total(:attack_self) > 10)
+  def self_attack_ready? 
+    (available_item_total(:attack_self) + available_item_total(:attack_self_high)) > 3
   end
   
   def well_prepared?
