@@ -28,7 +28,7 @@ class TargetTracker < ApiActor
     
     users = leaderboard.select do |user| 
       next false if @ignore_users.include?(user["PlayerName"].strip.downcase)
-      (user["Effects"] & ItemClasses.protect).none?
+      (user["Effects"] & (ItemClasses.point_bouncer + ItemClasses.protect)).none?
     end
     
     user = users.first

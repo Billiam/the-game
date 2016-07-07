@@ -128,7 +128,7 @@ class ItemUser < ApiActor
   end
   
   def unprotected?
-    ! has_effect?(ItemClasses.protect)
+    ! has_effect?(ItemClasses.protect + ItemClasses.point_bouncer)
   end
   
   def vulnerable?
@@ -299,21 +299,23 @@ class ItemUser < ApiActor
       when :go_big
         go_big_ready?
       when :protection_boost
-        in_first? || self_attack_ready?
+        unprotected? && (in_first? || self_attack_ready?)
       when :self_attack
         well_prepared?
       when :protect
         unprotected? && vulnerable?
       when :common_boost
-        common_boost_ready?
+        common_boost_ready? && unprotected?
       when :boost
-        boost_ready?
+        boost_ready? && unprotected?
       when :attack_player
         available_attacks.any?
       when :attack
         ( ! in_first?) || well_prepared?
-      else # :points have no preconditions
-        true
+      when :points
+        unprotected?
+      else
+        false
     end
   end
   
