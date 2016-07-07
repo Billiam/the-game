@@ -311,7 +311,7 @@ class ItemUser < ApiActor
       when :attack_player
         available_attacks.any?
       when :attack
-        ! in_first? || well_prepared?
+        ( ! in_first?) || well_prepared?
       else # :points have no preconditions
         true
     end
