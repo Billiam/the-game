@@ -131,7 +131,7 @@ class ItemUser < ApiActor
   end
   
   def vulnerable?
-    @current_position.between?(1, 3)
+    @current_position.between?(1, 2)
   end
   
   def in_first?
