@@ -118,7 +118,7 @@ class ItemUser < ApiActor
     available_effects(:boost).any? && common_boosting?
   end
   
-  def self_attack_ready? 
+  def self_attack_ready?
     (available_item_total(:attack_self) + available_item_total(:attack_self_high)) > 3
   end
   
@@ -226,8 +226,8 @@ class ItemUser < ApiActor
   end
   
   def available_item_total(type)
-    ItemClasses.by_type(type).sum do
-      item_count(type)
+    ItemClasses.by_type(type).inject(0) do |sum, item_name|
+      sum + item_count(item_name)
     end
   end
 
