@@ -5,6 +5,8 @@ require_relative "../item_classes"
 require_relative "../events"
 require_relative "../reporter"
 
+require_relative "../error/no_such_item_error"
+
 class ItemUser < ApiActor
   include Celluloid::Notifications
 
@@ -197,6 +199,8 @@ class ItemUser < ApiActor
       rescue JSON::ParserError => e
         puts "Could not parse result #{id} - #{name}, #{e}"
         
+        raise NoSuchItemError if e.message.include?("No such item found")
+        
         false
       end
     end
@@ -289,8 +293,10 @@ class ItemUser < ApiActor
     end
 
     return false unless item
-
+    
     use_item(item[:id], item[:name], type == :attack_player)
+  rescue NoSuchItemError => e
+    retry
   end
   
   def should_use?(type)

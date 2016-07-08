@@ -1,0 +1,2 @@
+class NoSuchItemError < StandardError
+end
